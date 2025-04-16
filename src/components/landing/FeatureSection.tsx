@@ -8,7 +8,7 @@ interface FeatureSectionProps {
 }
 
 export const FeatureSection = ({ id }: FeatureSectionProps) => {
-  const [activeSection, setActiveSection] = useState(0);
+  const [activeFeature, setActiveFeature] = useState(0);
   const [countdown, setCountdown] = useState(59);
   const [showGlitch, setShowGlitch] = useState(false);
 
@@ -30,6 +30,34 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
     
     return () => clearInterval(glitchInterval);
   }, []);
+
+  // Handle scroll snap
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const container = e.target as HTMLElement;
+      const scrollLeft = container.scrollLeft;
+      const width = container.clientWidth;
+      const newActive = Math.round(scrollLeft / width);
+      setActiveFeature(newActive);
+    };
+
+    const container = document.getElementById('feature-container');
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  // Scroll to feature function
+  const scrollToFeature = (index: number) => {
+    const container = document.getElementById('feature-container');
+    if (container) {
+      container.scrollTo({
+        left: container.clientWidth * index,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const features = [
     {
@@ -170,7 +198,7 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
       <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B6B]/5 via-[#4A1942]/5 to-transparent"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[url('/matrix.png')] opacity-[0.02]"></div>
       
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -182,14 +210,8 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
             <span className="text-[#FF6B6B]"> dopamine-driven </span>
             loops
             <motion.span
-              animate={{ 
-                rotate: [0, 360],
-              }}
-              transition={{ 
-                duration: 20,
-                repeat: Infinity,
-                ease: "linear"
-              }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               className="inline-block ml-2"
             >
               <Sparkles className="h-8 w-8 text-[#FFA94D]" />
@@ -199,17 +221,47 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
             One-time purchase. Lifetime of focus. No subscription BS.
           </p>
         </motion.div>
-        
-        {/* Feature cards with horizontal scroll */}
-        <div className="snap-x snap-mandatory flex overflow-x-auto scrollbar-hide -mx-4 px-4 pb-10 space-x-4">
+
+        {/* Feature Navigation Dots */}
+        <div className="flex justify-center gap-4 mb-8">
+          {[0, 1, 2].map((index) => (
+            <motion.button
+              key={index}
+              onClick={() => scrollToFeature(index)}
+              className={`group relative px-6 py-2 rounded-full transition-all ${
+                activeFeature === index ? 'bg-[#FF6B6B]/20' : 'hover:bg-white/5'
+              }`}
+            >
+              <motion.div 
+                className={`absolute inset-0 rounded-full ${
+                  activeFeature === index ? 'bg-[#FF6B6B]/20' : 'bg-transparent'
+                }`}
+                layoutId="activeFeature"
+                transition={{ type: "spring", duration: 0.6 }}
+              />
+              <span className={`relative z-10 text-sm font-medium ${
+                activeFeature === index ? 'text-[#FF6B6B]' : 'text-white/60'
+              }`}>
+                Feature {index + 1}/3
+              </span>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Feature Container */}
+        <div 
+          id="feature-container"
+          className="relative snap-x snap-mandatory flex overflow-x-auto scrollbar-hide"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {features.map((feature, index) => (
             <motion.div 
-              key={index} 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2 }}
-              className="snap-center flex-shrink-0 w-full md:w-[80%] lg:w-[70%] flex flex-col md:flex-row gap-10 items-center"
+              key={index}
+              className="snap-center flex-shrink-0 w-full flex flex-col md:flex-row gap-10 items-center px-4"
+              style={{ scrollSnapAlign: 'center' }}
             >
               <div className="flex-1 space-y-6">
                 <div className="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-2 border border-white/10">
@@ -227,7 +279,7 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
                 <motion.div 
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className="relative w-[280px] rounded-[25px] border-[8px] border-black bg-black shadow-xl"
+                  className="relative w-[280px] md:w-[320px] rounded-[25px] border-[8px] border-black bg-black shadow-xl"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B6B]/10 to-transparent opacity-50 rounded-[17px]"></div>
                   {feature.content}
@@ -235,6 +287,41 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* Scroll Indicators */}
+        <div className="flex justify-between items-center mt-8 px-4">
+          <motion.button
+            onClick={() => scrollToFeature(Math.max(0, activeFeature - 1))}
+            className={`p-2 rounded-full bg-white/5 border border-white/10 ${
+              activeFeature === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'
+            }`}
+            whileHover={activeFeature > 0 ? { scale: 1.1 } : {}}
+            whileTap={activeFeature > 0 ? { scale: 0.95 } : {}}
+          >
+            <ArrowRight className="h-6 w-6 text-white rotate-180" />
+          </motion.button>
+
+          {/* Progress Bar */}
+          <div className="flex-1 mx-8 h-1 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-[#FF6B6B]"
+              initial={{ width: '0%' }}
+              animate={{ width: `${(activeFeature + 1) * 33.33}%` }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
+          </div>
+
+          <motion.button
+            onClick={() => scrollToFeature(Math.min(2, activeFeature + 1))}
+            className={`p-2 rounded-full bg-white/5 border border-white/10 ${
+              activeFeature === 2 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'
+            }`}
+            whileHover={activeFeature < 2 ? { scale: 1.1 } : {}}
+            whileTap={activeFeature < 2 ? { scale: 0.95 } : {}}
+          >
+            <ArrowRight className="h-6 w-6 text-white" />
+          </motion.button>
         </div>
 
         {/* Touch Grass Section with enhanced visuals */}
