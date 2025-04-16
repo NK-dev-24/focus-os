@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import { Gauge, AlertTriangle, Brain, Zap, Activity, Trophy, Lock } from "lucide-react";
+import { Brain, AlertTriangle, ChevronRight, ChevronLeft, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const DopamineScoreSection = () => {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const [score, setScore] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
-  const [pulseEffect, setPulseEffect] = useState(false);
-  const [achievementUnlocked, setAchievementUnlocked] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [achievements, setAchievements] = useState([
-    { id: 1, title: "Focus Initiate", description: "Started your journey", threshold: 20, unlocked: false, icon: "🌱" },
-    { id: 2, title: "Mindful Explorer", description: "Reached halfway", threshold: 50, unlocked: false, icon: "🧘" },
-    { id: 3, title: "Dopamine Warrior", description: "Master of self-control", threshold: 80, unlocked: false, icon: "⚔️" },
-  ]);
-  
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [focusState, setFocusState] = useState<'focused' | 'warning' | 'critical'>('focused');
+
   useEffect(() => {
     const handleScroll = () => {
       const windowHeight = window.innerHeight;
@@ -24,193 +19,191 @@ export const DopamineScoreSection = () => {
       
       setScrollPercentage(currentPercentage);
       
-      // Smoother score calculation with easing
+      // Smooth score calculation
       const targetScore = Math.min(100, Math.round(currentPercentage * 1.2));
       const smoothingFactor = 0.1;
       const newScore = Math.round(score + (targetScore - score) * smoothingFactor);
       
-      // Check achievements
-      const newAchievements = achievements.map(achievement => ({
-        ...achievement,
-        unlocked: newScore >= achievement.threshold ? true : achievement.unlocked
-      }));
-      
-      // If any new achievements were unlocked
-      const newlyUnlocked = newAchievements.find(
-        (a, i) => a.unlocked && !achievements[i].unlocked
-      );
-      
-      if (newlyUnlocked) {
-        setAchievementUnlocked(true);
-        setTimeout(() => setAchievementUnlocked(false), 3000);
-      }
-      
-      setAchievements(newAchievements);
       setScore(newScore);
-      setShowWarning(newScore > 70);
+      
+      // Update focus state
+      if (newScore < 30) {
+        setFocusState('focused');
+      } else if (newScore < 70) {
+        setFocusState('warning');
+      } else {
+        setFocusState('critical');
+        setShowWarning(true);
+      }
     };
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [score, achievements]);
+  }, [score]);
 
-  const getMessage = () => {
-    if (score < 30) return {
-      text: "Focus mode activated. Keep it up!",
-      icon: <Brain className="h-4 w-4 text-[#00A3FF]" />,
-      color: "text-[#00A3FF]"
-    };
-    if (score < 60) return {
-      text: "Stay mindful of your scrolling",
-      icon: <Activity className="h-4 w-4 text-[#FFA94D]" />,
-      color: "text-[#FFA94D]"
-    };
-    if (score < 80) return {
-      text: "Time for a dopamine reset?",
-      icon: <Zap className="h-4 w-4 text-[#FF6B6B]" />,
-      color: "text-[#FF6B6B]"
-    };
-    return {
-      text: "Critical focus drift detected",
-      icon: <AlertTriangle className="h-4 w-4 text-[#FF6B6B]" />,
-      color: "text-[#FF6B6B]"
-    };
+  if (isDismissed) return null;
+
+  const stateConfig = {
+    focused: {
+      color: '#00A3FF',
+      text: 'Focus mode activated',
+      icon: Brain,
+      bgGradient: 'from-[#00A3FF]/10 to-transparent'
+    },
+    warning: {
+      color: '#FFA94D',
+      text: 'Focus drifting',
+      icon: Brain,
+      bgGradient: 'from-[#FFA94D]/10 to-transparent'
+    },
+    critical: {
+      color: '#FF6B6B',
+      text: 'Critical focus drift',
+      icon: AlertTriangle,
+      bgGradient: 'from-[#FF6B6B]/10 to-transparent'
+    }
   };
 
-  const message = getMessage();
+  const currentState = stateConfig[focusState];
+  const StateIcon = currentState.icon;
   
   return (
-    <motion.div 
-      className="fixed bottom-4 right-4 z-50"
-      animate={{ x: isMinimized ? 'calc(100% - 48px)' : 0 }}
-      transition={{ type: "spring", stiffness: 200, damping: 25 }}
-    >
-      <motion.div
+    <AnimatePresence>
+      <motion.div 
+        className="fixed bottom-6 right-6 z-50"
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`relative bg-black/90 backdrop-blur-xl rounded-xl border shadow-lg overflow-hidden
-          ${score < 30 ? 'border-[#00A3FF]/30' : score < 60 ? 'border-[#FFA94D]/30' : 'border-[#FF6B6B]/30'}`}
+        animate={{ 
+          opacity: 1, 
+          y: 0, 
+          scale: 1,
+          x: isMinimized ? 'calc(100% - 48px)' : 0 
+        }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ type: "spring", stiffness: 200, damping: 25 }}
       >
-        {/* Minimize Button */}
-        <button
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-3 right-3 p-1 rounded-full hover:bg-white/10 transition-colors"
+        <motion.div
+          className={`relative overflow-hidden rounded-2xl border bg-black/90 backdrop-blur-xl
+            ${focusState === 'focused' ? 'border-[#00A3FF]/20' : 
+              focusState === 'warning' ? 'border-[#FFA94D]/20' : 
+              'border-[#FF6B6B]/20'}`}
         >
-          <motion.div
-            animate={{ rotate: isMinimized ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
-            {isMinimized ? '←' : '→'}
-          </motion.div>
-        </button>
-
-        <div className={`p-4 ${isMinimized ? 'hidden' : 'block'}`}>
-          {/* Header */}
+          {/* Background Gradient */}
           <motion.div 
-            className="flex items-center gap-2 mb-4"
-            animate={{ scale: pulseEffect ? [1, 1.05, 1] : 1 }}
-          >
-            <div className="p-2 rounded-lg bg-white/5">
-              <Gauge className={`h-5 w-5 ${message.color}`} />
-            </div>
-            <div>
-              <h4 className="text-white font-bold text-sm">Focus Meter</h4>
-              <p className="text-white/60 text-xs">Level {Math.floor(score / 20) + 1}</p>
-            </div>
-          </motion.div>
-
-          {/* Progress Bar */}
-          <div className="relative h-4 bg-white/5 rounded-full mb-4 overflow-hidden">
-            <motion.div 
-              className="absolute inset-0 opacity-20 blur-md"
-              style={{ 
-                width: `${score}%`,
-                background: `linear-gradient(90deg, 
-                  ${score < 30 ? '#00A3FF' : score < 60 ? '#FFA94D' : '#FF6B6B'},
-                  transparent
-                )`
-              }}
-            />
-            <motion.div 
-              className="h-full rounded-full relative z-10"
-              style={{ 
-                width: `${score}%`,
-                background: score < 30 
-                  ? 'linear-gradient(90deg, #00A3FF, #00A3FF80)' 
-                  : score < 60 
-                  ? 'linear-gradient(90deg, #FFA94D, #FFA94D80)' 
-                  : 'linear-gradient(90deg, #FF6B6B, #FF6B6B80)' 
-              }}
-              animate={{
-                scale: pulseEffect ? [1, 1.02, 1] : 1
-              }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div 
-                className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-white shadow-lg"
-                animate={{
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{ duration: 1, repeat: Infinity }}
-              />
-            </motion.div>
-          </div>
-
-          {/* Achievements */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {achievements.map((achievement) => (
-              <motion.div
-                key={achievement.id}
-                className={`p-2 rounded-lg text-center ${
-                  achievement.unlocked 
-                    ? 'bg-white/10 text-white' 
-                    : 'bg-white/5 text-white/40'
-                }`}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="text-xl mb-1">{achievement.unlocked ? achievement.icon : '🔒'}</div>
-                <div className="text-xs font-medium truncate">{achievement.title}</div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Status Message */}
-          <motion.div 
-            className="flex items-center gap-2 p-2 rounded-lg bg-white/5"
-            animate={{ 
-              backgroundColor: showWarning ? ['rgba(255,255,255,0.05)', 'rgba(255,107,107,0.1)', 'rgba(255,255,255,0.05)'] : 'rgba(255,255,255,0.05)'
+            className="absolute inset-0 opacity-30"
+            animate={{
+              background: [
+                `radial-gradient(circle at 0% 0%, ${currentState.color}15, transparent 70%)`,
+                `radial-gradient(circle at 100% 100%, ${currentState.color}15, transparent 70%)`
+              ]
             }}
-            transition={{ duration: 2, repeat: showWarning ? Infinity : 0 }}
-          >
-            {message.icon}
-            <span className={`text-sm ${message.color}`}>{message.text}</span>
-          </motion.div>
-        </div>
-      </motion.div>
+            transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
+          />
 
-      {/* Achievement Popup */}
-      <AnimatePresence>
-        {achievementUnlocked && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="absolute bottom-full right-0 mb-4 bg-gradient-to-r from-[#FF6B6B] to-[#FFA94D] p-[1px] rounded-lg shadow-lg"
-          >
-            <div className="bg-black/90 backdrop-blur-xl rounded-lg px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-[#FFA94D]" />
-                <div>
-                  <div className="text-sm font-bold text-white">Achievement Unlocked!</div>
-                  <div className="text-xs text-white/80">
-                    {achievements.find(a => a.unlocked && !achievements[achievements.indexOf(a) - 1]?.unlocked)?.description}
-                  </div>
-                </div>
+          {/* Control Buttons */}
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <motion.button
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <motion.div
+                animate={{ rotate: isMinimized ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="text-white/80 hover:text-white"
+              >
+                {isMinimized ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </motion.div>
+            </motion.button>
+            <motion.button
+              onClick={() => setIsDismissed(true)}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X className="h-4 w-4 text-white/80 hover:text-white" />
+            </motion.button>
+          </div>
+
+          <div className={`p-4 ${isMinimized ? 'hidden' : 'block'}`}>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <motion.div 
+                className={`p-2 rounded-xl bg-gradient-to-br ${currentState.bgGradient}`}
+                animate={showWarning ? {
+                  scale: [1, 1.1, 1],
+                  rotate: [-5, 5, -5]
+                } : {}}
+                transition={{ duration: 2, repeat: showWarning ? Infinity : 0 }}
+              >
+                <StateIcon className={`h-5 w-5 text-[${currentState.color}]`} />
+              </motion.div>
+              <div>
+                <h4 className="text-sm font-medium text-white">Focus Meter</h4>
+                <p className={`text-xs`} style={{ color: currentState.color }}>
+                  {currentState.text}
+                </p>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+
+            {/* Progress Bar */}
+            <div className="relative h-1 bg-white/5 rounded-full overflow-hidden mb-2">
+              <motion.div 
+                className="absolute inset-0 blur-md"
+                style={{ 
+                  width: `${score}%`,
+                  background: `linear-gradient(90deg, ${currentState.color}, transparent)`
+                }}
+              />
+              <motion.div 
+                className="h-full relative"
+                style={{ 
+                  width: `${score}%`,
+                  background: `linear-gradient(90deg, ${currentState.color}, ${currentState.color}80)`
+                }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <motion.div 
+                  className="absolute right-0 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white shadow-lg"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    boxShadow: [
+                      `0 0 0 0 ${currentState.color}40`,
+                      `0 0 0 4px ${currentState.color}00`
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.div>
+            </div>
+
+            {/* Warning Message */}
+            <AnimatePresence>
+              {showWarning && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-3"
+                >
+                  <motion.div 
+                    className="flex items-center gap-2 p-2 rounded-lg bg-[#FF6B6B]/10"
+                    animate={{ 
+                      opacity: [0.7, 1, 0.7]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <AlertTriangle className="h-4 w-4 text-[#FF6B6B]" />
+                    <span className="text-xs text-[#FF6B6B]">
+                      Time for a break?
+                    </span>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
