@@ -10,9 +10,21 @@ const Code = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [codeRevealIndex, setCodeRevealIndex] = useState(0);
+  const [activationStatus, setActivationStatus] = useState<'pending' | 'activated' | 'error'>('pending');
   const { toast } = useToast();
   
-  const lifetimeCode = "FOCUS-4-LIFE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  // Generate a persistent lifetime code using a stable seed
+  const generateLifetimeCode = () => {
+    const timestamp = new Date().toISOString().split('T')[0]; // Use date as seed
+    const seed = timestamp.split('-').join(''); // Remove dashes
+    const hash = Array.from(seed).reduce((acc, char) => {
+      return ((acc << 5) - acc) + char.charCodeAt(0) | 0;
+    }, 0);
+    return "FOCUS-4-LIFE-" + Math.abs(hash).toString(36).substring(0, 6).toUpperCase();
+  };
+
+  // Store the code in state to keep it persistent
+  const [lifetimeCode] = useState(generateLifetimeCode());
   const codeArray = lifetimeCode.split('');
 
   const installSteps: string[] = [
@@ -42,34 +54,44 @@ const Code = () => {
     navigator.clipboard.writeText(lifetimeCode);
     setCopied(true);
     toast({
-      title: "Copied to clipboard",
-      description: "Don't lose it again. We're watching.",
+      title: "Code Secured! 🔐",
+      description: "Your lifetime access code is now in your clipboard.",
+      className: "bg-[#1A1A1A] border-[#FF6B6B] text-white",
     });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const downloadCertificate = () => {
+    setActivationStatus('activated');
     toast({
-      title: "Certificate of Recovery",
-      description: "Your badge of shame is downloading...",
+      title: "Achievement Unlocked! 🏆",
+      description: "Your Digital Freedom Certificate is being generated...",
+      className: "bg-[#1A1A1A] border-[#FF6B6B] text-white",
     });
     setShowEasterEgg(true);
   };
 
   const shareProgress = () => {
-    const text = `I just took control of my digital life with @focusOS.\nJoin the recovery: https://focus-os.com\n\n"Recovery isn't about perfection. It's about direction." 🧠✨`;
+    const text = `🚀 I've just unlocked digital freedom with @focusOS!\n\n"Recovery isn't about perfection. It's about direction." 🧠✨\n\nJoin the movement: https://focus-os.com\n\n#DigitalWellness #FocusOS`;
     
     if (navigator.share) {
       navigator.share({
-        title: 'My Digital Recovery Journey',
+        title: 'My Digital Freedom Journey',
         text: text,
         url: 'https://focus-os.com'
+      }).then(() => {
+        toast({
+          title: "Spread the Movement! 🌟",
+          description: "Thank you for sharing your journey!",
+          className: "bg-[#1A1A1A] border-[#FF6B6B] text-white",
+        });
       });
     } else {
       navigator.clipboard.writeText(text);
       toast({
-        title: "Share text copied!",
-        description: "Spread the word about your recovery.",
+        title: "Message Copied! 📋",
+        description: "Share text is ready to be pasted anywhere.",
+        className: "bg-[#1A1A1A] border-[#FF6B6B] text-white",
       });
     }
   };
@@ -193,46 +215,49 @@ const Code = () => {
               <div className="flex gap-3">
                 <Button
                   onClick={copyCode}
-                  className="flex-1 h-12 bg-gradient-to-r from-[#FF6B6B] to-[#FF4949] hover:from-[#FF4949] hover:to-[#FF6B6B] text-white hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,107,107,0.2)]"
+                  className="flex-1 h-12 bg-gradient-to-r from-[#FF6B6B] to-[#FF4949] hover:from-[#FF4949] hover:to-[#FF6B6B] text-white font-medium hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,107,107,0.2)]"
                 >
                   {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                  {copied ? "Copied!" : "Copy Code"}
+                  {copied ? "Secured!" : "Copy Code"}
                 </Button>
                 
                 <Button
                   onClick={shareProgress}
-                  variant="outline"
-                  className="flex-1 h-12 border border-white/10 hover:bg-white/5 text-white hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2"
+                  className="flex-1 h-12 bg-white/10 hover:bg-white/15 text-white font-medium border-[#FF6B6B]/20 hover:border-[#FF6B6B]/40 hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2"
                 >
-                  <Share2 className="h-5 w-5" />
+                  <Share2 className="h-5 w-5 text-[#FF6B6B]" />
                   Share Progress
                 </Button>
               </div>
 
               <Button
                 onClick={downloadCertificate}
-                variant="outline"
-                className="w-full h-12 bg-white/5 hover:bg-white/10 border-0 text-white hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2"
+                className={`w-full h-12 border-0 text-white font-medium hover:scale-[1.02] transform transition-all flex items-center justify-center gap-2 ${
+                  activationStatus === 'activated'
+                    ? 'bg-[#2A2A2A] hover:bg-[#333333] text-[#FF6B6B]'
+                    : 'bg-white/5 hover:bg-white/10'
+                }`}
               >
                 <Sparkles className="h-5 w-5 text-[#FF6B6B]" />
-                Claim Recovery Certificate
+                {activationStatus === 'activated' ? 'Certificate Claimed ✨' : 'Claim Recovery Certificate'}
               </Button>
             </motion.div>
 
+            {/* Easter Egg and Footer */}
             <AnimatePresence>
               {showEasterEgg && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="text-center space-y-2"
+                  className="text-center space-y-2 py-2"
                 >
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-gray-300">
                     "The first step isn't admitting you have a problem.
                     <br />
                     It's admitting your phone has you." 
                   </div>
-                  <div className="text-xs text-[#FF6B6B]">
+                  <div className="text-xs text-[#FF6B6B] font-medium">
                     – Ancient focusOS Proverb
                   </div>
                 </motion.div>
@@ -243,9 +268,10 @@ const Code = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="text-center text-sm text-gray-500"
+              className="text-center text-sm text-gray-400"
             >
-              Remember: Relapse is just a notification away 👀
+              Remember: Relapse is just a notification away 
+              <span className="ml-1 inline-block hover:scale-110 transform transition-all cursor-default">👀</span>
             </motion.div>
           </CardContent>
         </Card>
