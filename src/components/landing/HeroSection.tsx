@@ -66,7 +66,7 @@ export const HeroSection = () => {
             <Button 
               size="lg"
               variant="outline"
-              className="px-8 py-6 text-lg border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all rounded-xl backdrop-blur-sm"
+              className="px-8 py-6 text-lg border-2 border-[#FF6B6B] text-[#FF6B6B] hover:bg-[#FF6B6B]/10 hover:border-[#FF6B6B]/40 transition-all rounded-xl backdrop-blur-sm"
               onClick={scrollToDemo}
             >
               See How It Works
