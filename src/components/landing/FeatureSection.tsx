@@ -85,27 +85,27 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
 
   return (
     <section id={id} className="py-24 relative overflow-hidden bg-[#121212]">
-      {/* Ambient background effects */}
+      {/* Dynamic background effects */}
       <div className="absolute inset-0 bg-[url('/matrix.png')] opacity-[0.02]" />
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 bg-gradient-radial"
         animate={{
           background: [
-            `radial-gradient(600px circle at 0% 0%, ${features[activeFeature].color}15, transparent)`,
-            `radial-gradient(600px circle at 100% 100%, ${features[activeFeature].color}15, transparent)`
-          ],
+            `radial-gradient(circle at 30% 30%, ${features[activeFeature].color}15 0%, transparent 60%)`,
+            `radial-gradient(circle at 70% 70%, ${features[activeFeature].color}15 0%, transparent 60%)`
+          ]
         }}
-        transition={{ duration: 4, repeat: Infinity, repeatType: "reverse" }}
+        transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
       />
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 bg-white/5 rounded-full px-4 py-2 mb-6"
+            className="inline-flex items-center gap-2 bg-white/5 rounded-full px-4 py-2 mb-6 border border-white/10"
           >
             <Sparkles className="h-5 w-5 text-[#FFA94D]" />
             <span className="text-white/80 text-sm">Intelligent Intervention System</span>
@@ -115,10 +115,12 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight"
           >
             Your Focus Journey,{" "}
-            <span className="text-[#FF6B6B]">Reimagined</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF6B6B] to-[#FFA94D]">
+              Reimagined
+            </span>
           </motion.h2>
 
           <motion.p
@@ -132,34 +134,39 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
         </div>
 
         {/* Feature Navigation */}
-        <div className="flex justify-center gap-3 mb-12">
+        <div className="flex justify-center gap-3 mb-16">
           {features.map((feature, index) => (
             <motion.button
               key={index}
               onClick={() => scrollToFeature(index)}
-              className={`group relative px-6 py-2 rounded-full transition-all ${
-                activeFeature === index ? 'bg-white/10' : 'hover:bg-white/5'
-              }`}
+              className="relative"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{ 
-                  background: activeFeature === index 
-                    ? `linear-gradient(90deg, ${feature.color}20, ${feature.color}10)`
-                    : 'transparent'
-                }}
-                layoutId="activeFeatureIndicator"
-                transition={{ type: "spring", duration: 0.6 }}
-              />
-              <span className={`relative z-10 text-sm font-medium ${
+              <div className={`px-8 py-3 rounded-full transition-all duration-300 ${
                 activeFeature === index 
-                  ? `text-[${feature.color}]` 
-                  : 'text-white/60'
+                  ? 'bg-white/10 backdrop-blur-sm' 
+                  : 'hover:bg-white/5'
               }`}>
-                {index + 1}
-              </span>
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{ 
+                    background: activeFeature === index 
+                      ? `linear-gradient(90deg, ${feature.color}30, ${feature.color}10)`
+                      : 'transparent',
+                    opacity: activeFeature === index ? 1 : 0
+                  }}
+                  layoutId="activeFeatureIndicator"
+                  transition={{ type: "spring", duration: 0.6 }}
+                />
+                <span className={`relative z-10 text-sm font-medium ${
+                  activeFeature === index 
+                    ? `text-[${feature.color}]` 
+                    : 'text-white/60'
+                }`}>
+                  Feature {index + 1}
+                </span>
+              </div>
             </motion.button>
           ))}
         </div>
@@ -167,94 +174,108 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
         {/* Features Container */}
         <div
           ref={containerRef}
-          className="relative flex snap-x snap-mandatory overflow-x-hidden"
+          className="relative flex snap-x snap-mandatory overflow-x-hidden scroll-smooth"
           style={{ scrollSnapType: 'x mandatory' }}
         >
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              className="flex-shrink-0 w-full snap-center"
-              style={{ scrollSnapAlign: 'center' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                {/* Content */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="space-y-8"
-                >
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[${feature.color}]/10 text-[${feature.color}]`}>
-                    {feature.icon}
-                    <span className="text-sm font-medium">Feature {index + 1}/3</span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-3xl font-bold text-white mb-3">{feature.title}</h3>
-                    <p className={`text-[${feature.color}] text-xl mb-4`}>{feature.subtitle}</p>
-                    <p className="text-gray-400 text-lg leading-relaxed">{feature.description}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {feature.stats.map((stat, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.2 }}
-                        className={`p-4 rounded-xl bg-[${feature.color}]/5 border border-[${feature.color}]/10`}
-                      >
-                        <div className={`text-2xl font-bold mb-1 text-[${feature.color}]`}>
-                          {stat.value}
-                        </div>
-                        <div className="text-sm text-gray-400">{stat.label}</div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Phone Mockup */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="relative flex justify-center"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} blur-3xl rounded-full transform -rotate-12 scale-95`} />
+          <AnimatePresence mode="wait">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                className="flex-shrink-0 w-full snap-center"
+                style={{ scrollSnapAlign: 'center' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="grid md:grid-cols-2 gap-16 items-center">
+                  {/* Content */}
                   <motion.div
-                    whileHover={{ scale: 1.02, rotate: -1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="relative w-[300px] md:w-[380px]"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="space-y-8"
                   >
-                    <div className="relative rounded-[3rem] border-[14px] border-[#2A2A2A] bg-black overflow-hidden shadow-2xl">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-[#2A2A2A] rounded-b-2xl" />
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[${feature.color}]/10 text-[${feature.color}] border border-[${feature.color}]/20`}>
+                      {feature.icon}
+                      <span className="text-sm font-medium">{feature.subtitle}</span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">{feature.title}</h3>
+                      <p className="text-gray-400 text-lg leading-relaxed">{feature.description}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {feature.stats.map((stat, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: i * 0.2 }}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-6 rounded-xl bg-[${feature.color}]/5 border border-[${feature.color}]/10 backdrop-blur-sm hover:bg-[${feature.color}]/10 transition-colors duration-300`}
+                        >
+                          <div className={`text-3xl font-bold mb-1 text-[${feature.color}]`}>
+                            {stat.value}
+                          </div>
+                          <div className="text-sm text-gray-400">{stat.label}</div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Feature Image */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="relative flex justify-center"
+                  >
+                    <motion.div
+                      className="absolute inset-0 blur-3xl"
+                      animate={{
+                        background: [
+                          `radial-gradient(circle at 50% 50%, ${feature.color}30 0%, transparent 70%)`,
+                          `radial-gradient(circle at 50% 50%, ${feature.color}20 20%, transparent 80%)`
+                        ]
+                      }}
+                      transition={{ duration: 4, repeat: Infinity, repeatType: "reverse" }}
+                    />
+                    <motion.div
+                      whileHover={{ scale: 1.02, rotate: -1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="relative w-[300px] md:w-[380px]"
+                    >
                       <img
                         src={feature.image}
                         alt={feature.title}
-                        className="w-full aspect-[9/19.5] object-cover"
+                        className="w-full rounded-2xl shadow-2xl"
                       />
-                      <div className={`absolute inset-0 pointer-events-none ${feature.gradient} mix-blend-overlay`} />
-                    </div>
+                      <motion.div
+                        className={`absolute inset-0 rounded-2xl pointer-events-none ${feature.gradient} mix-blend-overlay`}
+                        animate={{
+                          opacity: [0.3, 0.5, 0.3]
+                        }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      />
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              </div>
-            </motion.div>
-          ))}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Navigation Controls */}
-        <div className="flex justify-center items-center gap-4 mt-12">
+        <div className="flex justify-center items-center gap-6 mt-16">
           <motion.button
             onClick={() => scrollToFeature(Math.max(0, activeFeature - 1))}
             disabled={activeFeature === 0}
-            className={`p-3 rounded-full ${
+            className={`p-4 rounded-full backdrop-blur-sm border ${
               activeFeature === 0 
-                ? 'bg-white/5 text-white/20 cursor-not-allowed' 
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' 
+                : 'bg-white/10 text-white hover:bg-white/20 border-white/10'
             }`}
             whileHover={activeFeature > 0 ? { scale: 1.1 } : {}}
             whileTap={activeFeature > 0 ? { scale: 0.9 } : {}}
@@ -262,21 +283,25 @@ export const FeatureSection = ({ id }: FeatureSectionProps) => {
             <ChevronLeft className="w-6 h-6" />
           </motion.button>
 
-          <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-64 h-1.5 bg-white/5 rounded-full overflow-hidden backdrop-blur-sm">
             <motion.div
-              className="h-full bg-[#FF6B6B]"
-              style={{ width: `${((activeFeature + 1) / features.length) * 100}%` }}
+              className="h-full"
+              style={{ 
+                background: `linear-gradient(90deg, ${features[activeFeature].color}, ${features[activeFeature].color}90)`,
+                width: `${((activeFeature + 1) / features.length) * 100}%`
+              }}
               layoutId="progressBar"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             />
           </div>
 
           <motion.button
             onClick={() => scrollToFeature(Math.min(features.length - 1, activeFeature + 1))}
             disabled={activeFeature === features.length - 1}
-            className={`p-3 rounded-full ${
+            className={`p-4 rounded-full backdrop-blur-sm border ${
               activeFeature === features.length - 1 
-                ? 'bg-white/5 text-white/20 cursor-not-allowed' 
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' 
+                : 'bg-white/10 text-white hover:bg-white/20 border-white/10'
             }`}
             whileHover={activeFeature < features.length - 1 ? { scale: 1.1 } : {}}
             whileTap={activeFeature < features.length - 1 ? { scale: 0.9 } : {}}
