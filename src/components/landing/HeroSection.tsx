@@ -1,12 +1,13 @@
-
 import { ArrowDown, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const HeroSection = () => {
   const [isShaking, setIsShaking] = useState(false);
   const [countdown, setCountdown] = useState(59);
   const [isFlickering, setIsFlickering] = useState(false);
+  const navigate = useNavigate();
 
   // Simulate countdown
   useEffect(() => {
@@ -57,17 +58,18 @@ export const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in delay-800">
             <Button 
               size="lg"
-              className="bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 text-black px-8 py-6 text-lg hover:scale-105 transition-transform rounded-xl"
-              onClick={scrollToDemo}
+              className="bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 text-white px-8 py-6 text-lg hover:scale-105 transition-all rounded-xl shadow-lg shadow-[#FF6B6B]/20"
+              onClick={() => navigate('/auth')}
             >
-              Try Demo
+              Get Started Now
             </Button>
             <Button 
               size="lg"
               variant="outline"
-              className="px-8 py-6 text-lg border-2 border-white text-white hover:bg-white/10 transition-all rounded-xl"
+              className="px-8 py-6 text-lg border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all rounded-xl backdrop-blur-sm"
+              onClick={scrollToDemo}
             >
-              How It Works
+              See How It Works
             </Button>
           </div>
         </div>

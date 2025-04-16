@@ -12,7 +12,11 @@ interface Feature {
   borderColor: string;
 }
 
-export const CtaSection = () => {
+interface CtaSectionProps {
+  id?: string;
+}
+
+export const CtaSection = ({ id }: CtaSectionProps) => {
   const navigate = useNavigate();
   const [isHovering, setIsHovering] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
@@ -58,7 +62,7 @@ export const CtaSection = () => {
   }, []);
   
   return (
-    <section className="py-24 px-4 bg-gradient-to-br from-[#1A0E1F] to-[#2A1029] text-white relative overflow-hidden">
+    <section id={id} className="py-24 px-4 bg-gradient-to-br from-[#1A0E1F] to-[#2A1029] text-white relative overflow-hidden">
       {/* Ambient background effects */}
       <div className="absolute inset-0 bg-noise opacity-5 z-0"></div>
       <motion.div 

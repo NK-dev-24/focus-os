@@ -1,6 +1,10 @@
 import { MessageSquare, Twitter, Laugh, Star, Heart, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface TestimonialsSectionProps {
+  id?: string;
+}
+
 const testimonials = [
   {
     text: "I opened Instagram. It opened regret.",
@@ -28,9 +32,9 @@ const testimonials = [
   }
 ];
 
-export const TestimonialsSection = () => {
+export const TestimonialsSection = ({ id }: TestimonialsSectionProps) => {
   return (
-    <section className="py-20 px-4 bg-[#1A0E1F] relative overflow-hidden">
+    <section id={id} className="py-20 px-4 bg-[#1A0E1F] relative overflow-hidden">
       {/* Ambient background effects */}
       <div className="absolute inset-0 bg-noise opacity-5 z-0"></div>
       <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B6B]/5 via-[#1DA1F2]/5 to-transparent"></div>

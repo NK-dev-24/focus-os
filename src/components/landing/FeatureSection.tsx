@@ -3,7 +3,11 @@ import { Phone, Clock, Ban, Lock, Zap, Camera, ArrowRight, Sparkles, Brain, Acti
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
-export const FeatureSection = () => {
+interface FeatureSectionProps {
+  id?: string;
+}
+
+export const FeatureSection = ({ id }: FeatureSectionProps) => {
   const [activeSection, setActiveSection] = useState(0);
   const [countdown, setCountdown] = useState(59);
   const [showGlitch, setShowGlitch] = useState(false);
@@ -161,7 +165,7 @@ export const FeatureSection = () => {
   ];
 
   return (
-    <section id="features" className="py-20 px-4 bg-[#121212] relative overflow-hidden">      
+    <section id={id} className="py-20 px-4 bg-[#121212] relative overflow-hidden">      
       {/* Ambient background effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B6B]/5 via-[#4A1942]/5 to-transparent"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[url('/matrix.png')] opacity-[0.02]"></div>
